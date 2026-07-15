@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.0.1](https://github.com/omnixys/security/compare/v3.0.0...v3.0.1) (2026-07-15)
+
+### Build
+
+* **Build:** fix build errors ([](https://github.com/omnixys/security/commit/8c91b6b309387b397c62a335b04c700c9e5431c6))
+
 ## [3.0.0](https://github.com/omnixys/security/compare/v2.1.0...v3.0.0) (2026-07-15)
 
 ### Update
