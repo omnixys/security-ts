@@ -5,12 +5,14 @@ import {
   type SecurityErrorMetadata,
 } from './security.exception.js';
 import type { EventRoleType } from '@omnixys/contracts';
+import type { EventPermissionKey } from '@omnixys/contracts';
 
 export type EventAccessDeniedReason =
   | 'unauthenticated'
   | 'event-id-missing'
   | 'event-role-not-found'
-  | 'event-role-mismatch';
+  | 'event-role-mismatch'
+  | 'event-permission-mismatch';
 
 export class EventAccessDeniedException extends ForbiddenException {
   readonly code = ErrorCode.EVENT_ACCESS_DENIED;
@@ -27,6 +29,8 @@ export class EventAccessDeniedException extends ForbiddenException {
     userId?: string;
     actualRole?: EventRoleType | null;
     requiredRoles?: EventRoleType[];
+    actualPermissions?: readonly EventPermissionKey[];
+    requiredPermissions?: readonly EventPermissionKey[];
   }) {
     const details = errorDetails(
       ErrorCode.EVENT_ACCESS_DENIED,
@@ -37,6 +41,8 @@ export class EventAccessDeniedException extends ForbiddenException {
         userId: params.userId,
         actualRole: params.actualRole,
         requiredRoles: params.requiredRoles,
+        actualPermissions: params.actualPermissions,
+        requiredPermissions: params.requiredPermissions,
       },
     );
 

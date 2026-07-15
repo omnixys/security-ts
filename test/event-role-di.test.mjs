@@ -1,5 +1,9 @@
 import {
   AuthModule,
+  EventPermissionGuard,
+  EventPermissionResolver,
+  EventPermissions,
+  EVENT_PERMISSIONS_KEY,
   EventRoleGuard,
   EventRoleResolver,
   EventRoles,
@@ -19,6 +23,15 @@ class MockEventRoleResolver extends EventRoleResolver {
   }
 }
 
+class MockEventPermissionResolver extends EventPermissionResolver {
+  async getPermissionsForUser(userId, eventId) {
+    if (userId === 'admin-user' && eventId === 'event-1') {
+      return ['roles.manage'];
+    }
+    return [];
+  }
+}
+
 test('AuthModule.forRoot compiles without EventRoleResolver', async () => {
   const module = await Test.createTestingModule({
     imports: [
@@ -31,6 +44,38 @@ test('AuthModule.forRoot compiles without EventRoleResolver', async () => {
 
   const authModule = module.get(AuthModule);
   assert.ok(authModule instanceof AuthModule, 'AuthModule should be resolvable');
+});
+
+test('EventPermissionGuard is exported from package barrel', () => {
+  assert.ok(typeof EventPermissionGuard === 'function', 'EventPermissionGuard is a class');
+  assert.ok(
+    typeof EventPermissionResolver === 'function',
+    'EventPermissionResolver is a class',
+  );
+  assert.ok(typeof EventPermissions === 'function', 'EventPermissions is a function');
+  assert.ok(typeof EVENT_PERMISSIONS_KEY === 'symbol', 'EVENT_PERMISSIONS_KEY is a symbol');
+});
+
+test('EventPermissionGuard resolves with EventPermissionResolver provider', async () => {
+  const module = await Test.createTestingModule({
+    providers: [
+      Reflector,
+      {
+        provide: EventPermissionResolver,
+        useClass: MockEventPermissionResolver,
+      },
+      EventPermissionGuard,
+    ],
+  }).compile();
+
+  const guard = module.get(EventPermissionGuard);
+  assert.ok(guard instanceof EventPermissionGuard, 'guard is an EventPermissionGuard');
+
+  const resolver = module.get(EventPermissionResolver);
+  assert.ok(
+    resolver instanceof MockEventPermissionResolver,
+    'resolver is MockEventPermissionResolver',
+  );
 });
 
 test('EventRoleGuard is exported from package barrel', () => {
