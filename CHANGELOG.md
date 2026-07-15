@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.0.0](https://github.com/omnixys/security/compare/v2.1.0...v3.0.0) (2026-07-15)
+
+### Update
+
+* **Update:** update package ([](https://github.com/omnixys/security/commit/d194c5ce6729d8f6c7aa8ac02fb1512b22b2825a))
+
 ## [2.1.0](https://github.com/omnixys/security/compare/v2.0.3...v2.1.0) (2026-07-02)
 
 ### EventRole
