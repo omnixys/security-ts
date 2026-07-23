@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.0.2](https://github.com/omnixys/security/compare/v3.0.1...v3.0.2) (2026-07-23)
+
+### Deps
+
+* **Deps:** update logger+observability deps version ([](https://github.com/omnixys/security/commit/2f65524a6e9c7bd601cb9fa88ae9e59e3b7f329c))
+
 ## [3.0.1](https://github.com/omnixys/security/compare/v3.0.0...v3.0.1) (2026-07-15)
 
 ### Build
