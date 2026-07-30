@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.0.4](https://github.com/omnixys/security-ts/compare/v3.0.3...v3.0.4) (2026-07-30)
+
+### Ci
+
+* **Ci:** Update release.yml ([](https://github.com/omnixys/security-ts/commit/8d30c50033650b6461efdab582ed2786657174d9))
+
 ## [3.0.3](https://github.com/omnixys/security-ts/compare/v3.0.2...v3.0.3) (2026-07-30)
 
 ### Deps
