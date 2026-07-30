@@ -1,6 +1,6 @@
 import { type ExecutionContext, Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { getRequest } from '@omnixys/context';
+import { getRequest } from '@omnixys/context-ts';
 
 @Injectable()
 export class CookieAuthGuard extends AuthGuard('jwt') {

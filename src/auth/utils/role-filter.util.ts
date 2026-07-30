@@ -1,4 +1,4 @@
-import { RealmRoleType } from '@omnixys/contracts';
+import { RealmRoleType } from '@omnixys/contracts-ts';
 
 /**
  * Keycloak technical roles that should be ignored.

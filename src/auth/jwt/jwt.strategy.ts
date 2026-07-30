@@ -4,7 +4,7 @@ import { SecurityPrincipalResolver } from '../context/security-principal.resolve
 import { extractUserRoles } from '../utils/extract-roles.util.js';
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { OmnixysLogger } from '@omnixys/logger';
+import { OmnixysLogger } from '@omnixys/logger-ts';
 import jwksRsa from 'jwks-rsa';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 

@@ -2,8 +2,8 @@ import { extractUserRoles } from '../utils/extract-roles.util.js';
 import { resolvePrimaryRole } from '../utils/role-filter.util.js';
 import type { AuthUser } from '../types/auth-user.type.js';
 import { createParamDecorator, type ExecutionContext } from '@nestjs/common';
-import { getRequest } from '@omnixys/context';
-import type { RealmRoleType } from '@omnixys/contracts';
+import { getRequest } from '@omnixys/context-ts';
+import type { RealmRoleType } from '@omnixys/contracts-ts';
 import type { FastifyRequest } from 'fastify';
 
 export interface CurrentUserData {

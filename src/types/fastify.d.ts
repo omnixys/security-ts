@@ -1,5 +1,5 @@
 import '@fastify/cookie';
-import type { AuthUser } from '@omnixys/context';
+import type { AuthUser } from '@omnixys/context-ts';
 import 'fastify';
 
 declare module 'fastify' {

@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import type { RealmRoleType } from '@omnixys/contracts';
+import type { RealmRoleType } from '@omnixys/contracts-ts';
 
 export const ROLES_KEY = Symbol('roles');
 

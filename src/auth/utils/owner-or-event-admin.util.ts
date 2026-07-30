@@ -1,4 +1,4 @@
-import { EventRoleType } from '@omnixys/contracts';
+import { EventRoleType } from '@omnixys/contracts-ts';
 
 export function isOwnerOrEventAdmin(
   resourceOwnerId: string,

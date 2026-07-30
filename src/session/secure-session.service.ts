@@ -2,7 +2,7 @@ import { SessionExpiredException } from '../errors/security.exception.js';
 import { JweService } from '../jwe/core/jwe.service.js';
 import { SECURITY_OPTIONS } from '../security.constants.js';
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import { OmnixysLogger } from '@omnixys/logger';
+import { OmnixysLogger } from '@omnixys/logger-ts';
 import { randomUUID } from 'node:crypto';
 
 export interface SessionMetadata {

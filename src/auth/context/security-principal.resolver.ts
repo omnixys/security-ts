@@ -3,7 +3,7 @@ import type {
   PrincipalContext,
   PrincipalResolutionInput,
   PrincipalResolver,
-} from '@omnixys/context';
+} from '@omnixys/context-ts';
 
 export interface VerifiedJwtPrincipalClaims {
   readonly [claim: string]: unknown;

@@ -4,8 +4,8 @@ import {
   HttpStatus,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ContextAccessor } from '@omnixys/context';
-import { ErrorCode } from '@omnixys/contracts';
+import { ContextAccessor } from '@omnixys/context-ts';
+import { ErrorCode } from '@omnixys/contracts-ts';
 
 export interface SecurityErrorContext {
   readonly requestId: string;

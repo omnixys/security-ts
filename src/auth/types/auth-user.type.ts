@@ -1,4 +1,4 @@
-import type { KeycloakRawOutput } from '@omnixys/contracts';
+import type { KeycloakRawOutput } from '@omnixys/contracts-ts';
 
 /**
  * Verified authentication result retained for compatibility with existing

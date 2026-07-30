@@ -1,8 +1,8 @@
 import { SECURITY_OPTIONS } from '../security.constants.js';
 import { RateLimitStore } from './rate-limit.store.js';
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import { OmnixysLogger } from '@omnixys/logger';
-import { CacheObservabilityService } from '@omnixys/observability';
+import { OmnixysLogger } from '@omnixys/logger-ts';
+import { CacheObservabilityService } from '@omnixys/observability-ts';
 
 export interface RateLimitResult {
   allowed: boolean;

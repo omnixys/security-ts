@@ -2,7 +2,7 @@ import { RateLimitService } from './rate-limit.service.js';
 import { RateLimitExceededException } from '../errors/security.exception.js';
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { getIp } from '@omnixys/context';
+import { getIp } from '@omnixys/context-ts';
 
 @Injectable()
 export class RateLimitGuard implements CanActivate {

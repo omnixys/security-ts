@@ -1,4 +1,4 @@
-import type { EventRoleType } from '@omnixys/contracts';
+import type { EventRoleType } from '@omnixys/contracts-ts';
 import { SetMetadata } from '@nestjs/common';
 
 export const EVENT_ROLES_KEY = Symbol('event_roles');

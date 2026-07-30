@@ -1,5 +1,5 @@
 import { Injectable, Optional } from '@nestjs/common';
-import { OmnixysLogger } from '@omnixys/logger';
+import { OmnixysLogger } from '@omnixys/logger-ts';
 
 export interface JweKey {
   kid: string;

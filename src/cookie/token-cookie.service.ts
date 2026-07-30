@@ -2,7 +2,7 @@ import { SECURITY_OPTIONS } from '../security.constants.js';
 import type { SecurityModuleOptions } from '../types/security.types.js';
 import { CookieService } from './cookie.service.js';
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import { OmnixysLogger } from '@omnixys/logger';
+import { OmnixysLogger } from '@omnixys/logger-ts';
 import type { FastifyReply } from 'fastify';
 
 export interface TokenCookieValues {

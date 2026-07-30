@@ -1,4 +1,4 @@
-import type { EventRoleType } from '@omnixys/contracts';
+import type { EventRoleType } from '@omnixys/contracts-ts';
 
 export abstract class EventRoleResolver {
   abstract getRoleForUser(

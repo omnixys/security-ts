@@ -7,9 +7,9 @@ import {
   Optional,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { getRequest } from '@omnixys/context';
-import type { RealmRoleType } from '@omnixys/contracts';
-import { OmnixysLogger } from '@omnixys/logger';
+import { getRequest } from '@omnixys/context-ts';
+import type { RealmRoleType } from '@omnixys/contracts-ts';
+import { OmnixysLogger } from '@omnixys/logger-ts';
 
 @Injectable()
 export class RoleGuard implements CanActivate {

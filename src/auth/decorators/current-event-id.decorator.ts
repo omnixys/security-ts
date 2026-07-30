@@ -1,5 +1,5 @@
 import { createParamDecorator, type ExecutionContext } from '@nestjs/common';
-import { getRequest } from '@omnixys/context';
+import { getRequest } from '@omnixys/context-ts';
 
 export const RESOLVED_EVENT_ID_REQUEST_KEY = 'resolvedEventId';
 

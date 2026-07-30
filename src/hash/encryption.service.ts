@@ -1,6 +1,6 @@
 import { HashOptions } from '../types/security.types.js';
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import { OmnixysLogger } from '@omnixys/logger';
+import { OmnixysLogger } from '@omnixys/logger-ts';
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 
 @Injectable()

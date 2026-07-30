@@ -1,7 +1,7 @@
 import { SecurityAuditEvent } from './audit.types.js';
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import { ContextAccessor } from '@omnixys/context';
-import { OmnixysLogger } from '@omnixys/logger';
+import { ContextAccessor } from '@omnixys/context-ts';
+import { OmnixysLogger } from '@omnixys/logger-ts';
 
 @Injectable()
 export class SecurityAuditService {

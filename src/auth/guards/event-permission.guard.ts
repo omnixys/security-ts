@@ -6,8 +6,8 @@ import {
   type ExecutionContext,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import type { EventPermissionKey } from '@omnixys/contracts';
-import { getRequest } from '@omnixys/context';
+import type { EventPermissionKey } from '@omnixys/contracts-ts';
+import { getRequest } from '@omnixys/context-ts';
 
 import { EventAccessDeniedException } from '../../errors/event-access-denied.exception.js';
 import { RESOLVED_EVENT_ID_REQUEST_KEY } from '../decorators/current-event-id.decorator.js';

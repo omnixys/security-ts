@@ -113,7 +113,7 @@ jobs:
           echo "@omnixys:registry=https://npm.pkg.github.com" >> .npmrc
           echo "//npm.pkg.github.com/:_authToken=${OMNIXYS_TOKEN}" >> .npmrc
         env:
-          OMNIXYS_TOKEN: ${{ secrets.OMNIXYS_TOKEN }}
+          OMNIXYS_TOKEN: ${{ secrets.OMNIXYS_TOKEN }}-ts
 
       - run: pnpm install
       - run: pnpm build

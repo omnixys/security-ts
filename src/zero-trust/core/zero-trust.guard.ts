@@ -9,8 +9,8 @@ import {
   Injectable,
   Optional,
 } from '@nestjs/common';
-import { ContextAccessor, getRequest } from '@omnixys/context';
-import { OmnixysLogger } from '@omnixys/logger';
+import { ContextAccessor, getRequest } from '@omnixys/context-ts';
+import { OmnixysLogger } from '@omnixys/logger-ts';
 
 @Injectable()
 export class ZeroTrustGuard implements CanActivate {

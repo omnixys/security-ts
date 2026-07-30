@@ -1,11 +1,11 @@
 import { ForbiddenException } from '@nestjs/common';
-import { ErrorCode } from '@omnixys/contracts';
+import { ErrorCode } from '@omnixys/contracts-ts';
 import {
   errorDetails,
   type SecurityErrorMetadata,
 } from './security.exception.js';
-import type { EventRoleType } from '@omnixys/contracts';
-import type { EventPermissionKey } from '@omnixys/contracts';
+import type { EventRoleType } from '@omnixys/contracts-ts';
+import type { EventPermissionKey } from '@omnixys/contracts-ts';
 
 export type EventAccessDeniedReason =
   | 'unauthenticated'

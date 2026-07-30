@@ -1,4 +1,4 @@
-import type { EventPermissionKey } from '@omnixys/contracts';
+import type { EventPermissionKey } from '@omnixys/contracts-ts';
 
 export abstract class EventPermissionResolver {
   abstract getPermissionsForUser(
