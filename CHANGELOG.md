@@ -3,6 +3,13 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.0.3](https://github.com/omnixys/security-ts/compare/v3.0.2...v3.0.3) (2026-07-30)
+
+### Deps
+
+* **Deps:** fix imports ([](https://github.com/omnixys/security-ts/commit/dd10665f9cda17c8ba0617002f1e433122525e5d))
+* **Deps:** fix imports ([](https://github.com/omnixys/security-ts/commit/1a4fb65401b366b30de577c87dc5907ea52112fa))
+
 ## [3.0.2](https://github.com/omnixys/security/compare/v3.0.1...v3.0.2) (2026-07-23)
 
 ### Deps
