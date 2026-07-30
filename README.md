@@ -1,4 +1,4 @@
-# 🔐 @omnixys/security
+# 🔐 @omnixys/security-ts
 
 > **Zero Trust Security Framework for NestJS**
 > JWT Validation · JWE Sessions · RBAC · Risk Engine · Distributed Security
@@ -7,7 +7,7 @@
 
 ## 📦 Overview
 
-`@omnixys/security` ist ein **modulares Security Framework** für NestJS mit Fokus auf:
+`@omnixys/security-ts` ist ein **modulares Security Framework** für NestJS mit Fokus auf:
 
 * **Zero Trust Authentication**
 * **JWT + JWKS Validation (Keycloak / OAuth2 ready)**
@@ -41,7 +41,7 @@ SecurityModule
 ## 🚀 Installation
 
 ```bash
-pnpm add @omnixys/security
+pnpm add @omnixys/security-ts
 ```
 
 ---
