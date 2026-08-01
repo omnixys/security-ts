@@ -3,6 +3,17 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.1.0](https://github.com/omnixys/security-ts/compare/v3.0.4...v3.1.0) (2026-08-01)
+
+### Deps
+
+* **Deps:** update omnixs package deps ([](https://github.com/omnixys/security-ts/commit/014ee591a71dccd41befafd63c24a94b11b019be))
+* **Deps:** update omnixs package deps ([](https://github.com/omnixys/security-ts/commit/7542453e8b562a1dc69d2b7b8063c19f062fde83))
+
+### Tenant
+
+* **Tenant:** add TenantVerifierService with gRPC membership verification ([](https://github.com/omnixys/security-ts/commit/51296f9897d66b2b95a8cdae930a61a63d2b6b72))
+
 ## [3.0.4](https://github.com/omnixys/security-ts/compare/v3.0.3...v3.0.4) (2026-07-30)
 
 ### Ci
