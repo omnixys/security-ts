@@ -1,11 +1,20 @@
 import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
+import { CONTEXT_TENANT_VERIFIER } from '@omnixys/context-ts';
+import { GrpcClientModule } from '@omnixys/grpc-ts/clients';
+import { fileURLToPath } from 'node:url';
 
 import { AuthModule } from './auth/auth.module.js';
 import { JweModule } from './jwe/jwe.module.js';
 
-import { SECURITY_OPTIONS } from './security.constants.js';
+import {
+  SECURITY_OPTIONS,
+  TENANT_GRPC_CLIENT,
+  TENANT_VERIFICATION_OPTIONS,
+} from './security.constants.js';
 import type { SecurityModuleOptions } from './types/security.types.js';
+
+import { TenantVerifierService } from './tenant/tenant-verifier.service.js';
 
 import { CookieService } from './cookie/cookie.service.js';
 import { TokenCookieService } from './cookie/token-cookie.service.js';
@@ -80,6 +89,31 @@ export class SecurityModule {
       ? [{ provide: APP_GUARD, useClass: RateLimitGuard }]
       : [];
 
+    const tenantVerificationProviders: Provider[] = [];
+    const tenantVerificationImports: unknown[] = [];
+
+    if (options.tenantVerification) {
+      tenantVerificationImports.push(
+        GrpcClientModule.register(
+          {
+            package: 'omnixys.tenant',
+            protoPath: fileURLToPath(
+              import.meta.resolve('@omnixys/grpc-ts/proto/tenant.proto'),
+            ),
+            url: options.tenantVerification.url,
+          },
+          TENANT_GRPC_CLIENT,
+        ),
+      );
+      tenantVerificationProviders.push(
+        {
+          provide: TENANT_VERIFICATION_OPTIONS,
+          useValue: options.tenantVerification,
+        },
+        { provide: CONTEXT_TENANT_VERIFIER, useClass: TenantVerifierService },
+      );
+    }
+
     return {
       module: SecurityModule,
       imports: [
@@ -88,8 +122,15 @@ export class SecurityModule {
         ZeroTrustModule.forRoot(options.zeroTrust ?? {}),
         HashModule.forRoot(options?.hash || {}),
         ...(options?.rateLimit?.imports ?? []),
+        ...tenantVerificationImports,
       ],
-      providers: [...providers, ...distributedProviders, ...globalGuards, ...gloabalRateLimitGuard],
+      providers: [
+        ...providers,
+        ...distributedProviders,
+        ...globalGuards,
+        ...gloabalRateLimitGuard,
+        ...tenantVerificationProviders,
+      ],
       exports: [
         AuthModule,
         ZeroTrustModule,
@@ -100,6 +141,7 @@ export class SecurityModule {
         FingerprintService,
         ...(options.distributed?.revocationStore ? [TokenRevocationService] : []),
         ...(options.distributed?.auditProducer ? [SecurityAuditService] : []),
+        ...(options.tenantVerification ? [CONTEXT_TENANT_VERIFIER] : []),
       ],
     };
   }

@@ -9,6 +9,7 @@ export * from './hash/index.js';
 export * from './rate-limit/index.js';
 export * from './cookie/index.js';
 export * from './errors/index.js';
+export * from './tenant/index.js';
 
 export * from './distributed/index.js';
 export * from './hash/index.js';

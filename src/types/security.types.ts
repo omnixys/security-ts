@@ -1,4 +1,5 @@
 import type { JweModuleOptions } from '../jwe/jwe.module.js';
+import type { TenantVerificationOptions } from '../tenant/tenant-verifier.service.js';
 import { RateLimitStore } from '../rate-limit/rate-limit.store.js';
 import type { DeviceStore } from '../zero-trust/device/device.store.js';
 import { RiskMemoryStore } from '../zero-trust/index.js';
@@ -84,4 +85,11 @@ export interface SecurityModuleOptions {
   globalGuards?: boolean;
 
   rateLimit?: SecurityRateLimitOptions;
+
+  /**
+   * Enables canonical tenant verification for every request (wired into the
+   * shared `ContextInterceptor` via the `CONTEXT_TENANT_VERIFIER` token).
+   * Requires a Valkey-backed cache service and the tenant gRPC service.
+   */
+  tenantVerification?: TenantVerificationOptions;
 }
