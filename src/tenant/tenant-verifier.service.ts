@@ -3,11 +3,14 @@ import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { ContextAccessor } from '@omnixys/context-ts';
 import type { TenantVerifier } from '@omnixys/context-ts';
 import type {
+  GetTenantResponse,
   TenantServiceClient,
   ValidateMembershipResponse,
 } from '@omnixys/grpc-ts';
+import { TenantStatus } from '@omnixys/grpc-ts';
 import { ValkeyService } from '@omnixys/cache-ts';
 import * as grpc from '@grpc/grpc-js';
+import { lastValueFrom, type Observable } from 'rxjs';
 
 import { TENANT_GRPC_CLIENT, TENANT_VERIFICATION_OPTIONS } from '../security.constants.js';
 import {
@@ -32,7 +35,11 @@ interface ValidateMembershipCall {
   (
     request: { tenantId: string; userId?: string },
     metadata?: grpc.Metadata,
-  ): Promise<ValidateMembershipResponse>;
+  ): Observable<ValidateMembershipResponse>;
+}
+
+interface GetTenantCall {
+  (request: { id: string }, metadata?: grpc.Metadata): Observable<GetTenantResponse>;
 }
 
 const CACHE_TTL_SECONDS = 45;
@@ -65,8 +72,8 @@ export class TenantVerifierService implements TenantVerifier {
       return;
     }
 
-    const result = await this.callValidateMembership(tenantId);
-    this.assertTenantAllowed(result, tenantId);
+    const result = await this.callGetTenant(tenantId);
+    this.assertTenantExistsAndActive(result, tenantId);
   }
 
   private async cachedHit(cacheKey: string): Promise<boolean> {
@@ -115,9 +122,11 @@ export class TenantVerifierService implements TenantVerifier {
 
     try {
       const validateMembership = client.validateMembership as unknown as ValidateMembershipCall;
-      return await validateMembership(
-        { tenantId, ...(userId ? { userId } : {}) },
-        metadata,
+      return await lastValueFrom(
+        validateMembership(
+          { tenantId, ...(userId ? { userId } : {}) },
+          metadata,
+        ),
       );
     } catch (error) {
       const code = this.resolveGrpcCode(error);
@@ -129,6 +138,34 @@ export class TenantVerifierService implements TenantVerifier {
         });
       }
 
+      throw new TenantServiceUnavailableException(tenantId, {
+        reason: 'tenant_service_unavailable',
+        grpcCode: code ?? undefined,
+        ...this.scopeMetadata(),
+      });
+    }
+  }
+
+  private async callGetTenant(tenantId: string): Promise<GetTenantResponse> {
+    const client = this.grpc.getService<TenantServiceClient>('TenantService');
+    const metadata = new grpc.Metadata();
+    metadata.set('authorization', `Bearer ${this.options.callerToken}`);
+
+    try {
+      const getTenant = client.getTenant as unknown as GetTenantCall;
+      return await lastValueFrom(getTenant({ id: tenantId }, metadata));
+    } catch (error) {
+      const code = this.resolveGrpcCode(error);
+      if (code === grpc.status.NOT_FOUND) {
+        throw new TenantNotFoundException(tenantId, this.scopeMetadata());
+      }
+      if (code === grpc.status.INVALID_ARGUMENT) {
+        throw new TenantContextUnverifiedException(tenantId, {
+          reason: 'tenant_verification_rejected',
+          grpcCode: code,
+          ...this.scopeMetadata(),
+        });
+      }
       throw new TenantServiceUnavailableException(tenantId, {
         reason: 'tenant_service_unavailable',
         grpcCode: code ?? undefined,
@@ -164,19 +201,19 @@ export class TenantVerifierService implements TenantVerifier {
     }
   }
 
-  private assertTenantAllowed(
-    result: ValidateMembershipResponse,
+  private assertTenantExistsAndActive(
+    result: GetTenantResponse,
     tenantId: string,
   ): void {
     const metadata = this.scopeMetadata();
 
-    if (!result.tenantExists) {
+    if (!result.tenant) {
       throw new TenantNotFoundException(tenantId, metadata);
     }
-    if (!result.tenantActive) {
+    if (result.tenant.status !== TenantStatus.ACTIVE) {
       throw new TenantDisabledException(tenantId, {
         ...metadata,
-        reason: result.reason || undefined,
+        reason: result.tenant.status,
       });
     }
   }
