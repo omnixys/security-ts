@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.1.1](https://github.com/omnixys/security-ts/compare/v3.1.0...v3.1.1) (2026-08-02)
+
+### Fix
+
+* **Fix:** Update tenant-verifier.service.ts ([](https://github.com/omnixys/security-ts/commit/4e416dba54214fe2d3a44d79586014c57cc7150e))
+
 ## [3.1.0](https://github.com/omnixys/security-ts/compare/v3.0.4...v3.1.0) (2026-08-01)
 
 ### Deps
