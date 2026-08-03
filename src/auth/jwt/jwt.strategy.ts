@@ -23,6 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       issuer: options.issuer,
       audience: options.audience,
+      passReqToCallback: true,
 
       secretOrKeyProvider: jwksRsa.passportJwtSecret({
         cache: true,
@@ -34,12 +35,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
+  async validate(request: any, payload: any) {
     const roles = extractUserRoles(payload);
+    const headerTenantId = firstStringHeader(request?.headers?.['x-tenant-id']);
     const contextPrincipal = this.principalResolver.fromVerifiedJwt(
       payload,
       roles,
       this.options.tenantClaim,
+      headerTenantId,
     );
     if (!contextPrincipal) {
       this.logger
@@ -61,4 +64,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       contextPrincipal,
     };
   }
+}
+
+function firstStringHeader(value: unknown): string | undefined {
+  if (typeof value === 'string' && value.length > 0) return value;
+  if (!Array.isArray(value)) return undefined;
+  return value.find((entry): entry is string => typeof entry === 'string');
 }

@@ -14,12 +14,14 @@ test('maps only verified identity metadata into PrincipalContext', () => {
   const principal = resolver.fromVerifiedJwt(
     {
       sub: 'subject-1',
-      tenant_id: 'tenant-1',
+      tenant_ids: ['tenant-1'],
       sid: 'session-1',
       acr: 'mfa',
       iat: 1_700_000_000,
     },
     ['admin'],
+    undefined,
+    'tenant-1',
   );
 
   assert.deepEqual(principal, {
@@ -69,7 +71,7 @@ test('uses only a configured verified tenant claim', () => {
   const principal = resolver.fromVerifiedJwt(
     {
       sub: 'subject-1',
-      tenant_id: 'ignored-default',
+      tenant_ids: ['ignored-default'],
       organization_id: 'trusted-organization',
     },
     [],
@@ -79,7 +81,7 @@ test('uses only a configured verified tenant claim', () => {
   assert.equal(principal.tenantId, 'trusted-organization');
 });
 
-test('rejects conflicting verified tenant claims with canonical identifiers', () => {
+test('rejects a verified token whose header tenant is not in tenant_ids', () => {
   ContextAccessor.run(
     {
       requestId: 'request-1',
@@ -96,10 +98,11 @@ test('rejects conflicting verified tenant claims with canonical identifiers', ()
           resolver.fromVerifiedJwt(
             {
               sub: 'subject-1',
-              tenant_id: 'tenant-a',
-              tenantId: 'tenant-b',
+              tenant_ids: ['tenant-a', 'tenant-b'],
             },
             [],
+            undefined,
+            'tenant-c',
           ),
         (error) => {
           assert.ok(error instanceof UnauthorizedTenantException);
@@ -125,11 +128,14 @@ test('JwtStrategy preserves its legacy user result and adds contextPrincipal', a
     sub: 'subject-1',
     preferred_username: 'tester',
     email: 'tester@example.com',
-    tenant_id: 'tenant-1',
+    tenant_ids: ['tenant-1'],
     realm_access: { roles: ['admin'] },
   };
 
-  const user = await strategy.validate(payload);
+  const user = await strategy.validate(
+    { headers: { 'x-tenant-id': 'tenant-1' } },
+    payload,
+  );
 
   assert.equal(user.id, 'subject-1');
   assert.equal(user.username, 'tester');
@@ -146,7 +152,7 @@ test('JwtStrategy rejects a verified token without a principal subject', async (
   });
 
   await assert.rejects(
-    strategy.validate({ realm_access: { roles: [] } }),
+    strategy.validate({ headers: {} }, { realm_access: { roles: [] } }),
     InvalidCredentialsException,
   );
 });
