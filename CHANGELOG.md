@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.0.0](https://github.com/omnixys/security-ts/compare/v3.1.1...v4.0.0) (2026-08-03)
+
+### Security
+
+* **Security:** resolve tenant from header against tenant_ids claim ([](https://github.com/omnixys/security-ts/commit/86b516a968b454649a1e743752aff02c8a3296e8))
+
 ## [3.1.1](https://github.com/omnixys/security-ts/compare/v3.1.0...v3.1.1) (2026-08-02)
 
 ### Fix
