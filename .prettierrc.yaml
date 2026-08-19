@@ -14,7 +14,7 @@
 # For more information, visit <https://www.gnu.org/licenses/>.
 
 # ============================================================
-# 🧩 Prettier-Konfiguration für TypeScript + Node + NestJS
+# 🧩 Prettier-Konfiguration für TypeScript + Node + NestJS 
 # ------------------------------------------------------------
 # Ziel: Einheitlicher Stil, maximale Lesbarkeit, CI/CD-kompatibel
 # ============================================================
