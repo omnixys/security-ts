@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.0.2](https://github.com/omnixys/security-ts/compare/v4.0.1...v4.0.2) (2026-08-19)
+
+### Update
+
+* **Update:** Update .prettierrc.yaml ([](https://github.com/omnixys/security-ts/commit/5f52581aa59064aa050eaf40550be15a33deda56))
+
 ## [4.0.1](https://github.com/omnixys/security-ts/compare/v4.0.0...v4.0.1) (2026-08-19)
 
 ### Agent
