@@ -9,6 +9,9 @@ export class RateLimitGuard implements CanActivate {
   constructor(private readonly rateLimit: RateLimitService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    if (request.url?.startsWith('/health')) return true;
+
     const ip = getIp(context);
 
     const key = `rate-limit:${ip}`; // oder userId
