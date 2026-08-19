@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.0.1](https://github.com/omnixys/security-ts/compare/v4.0.0...v4.0.1) (2026-08-19)
+
+### Agent
+
+* **Agent:** add repository development instructions ([](https://github.com/omnixys/security-ts/commit/0b36d8d2f47b6a8c1ce6badaa138e41e7e154996))
+
+### Security
+
+* **Security:** exclude health endpoints from rate-limit guard ([](https://github.com/omnixys/security-ts/commit/e9597738ebe1a61d9c86b4e29cdfb93a81c558cc))
+
 ## [4.0.0](https://github.com/omnixys/security-ts/compare/v3.1.1...v4.0.0) (2026-08-03)
 
 ### Security
