@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.0.4](https://github.com/omnixys/security-ts/compare/v4.0.3...v4.0.4) (2026-08-23)
+
+### Deps
+
+* **Deps:** update ([](https://github.com/omnixys/security-ts/commit/b598f55a810a5476a59067810a9267190f38f8be))
+
 ## [4.0.3](https://github.com/omnixys/security-ts/compare/v4.0.2...v4.0.3) (2026-08-23)
 
 ### Security
