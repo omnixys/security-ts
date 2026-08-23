@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.0.3](https://github.com/omnixys/security-ts/compare/v4.0.2...v4.0.3) (2026-08-23)
+
+### Security
+
+* **Security:** support GraphQL rate limiting ([](https://github.com/omnixys/security-ts/commit/fa325ef84558e2d30988f8e0702c95a88ab078b4))
+
 ## [4.0.2](https://github.com/omnixys/security-ts/compare/v4.0.1...v4.0.2) (2026-08-19)
 
 ### Update
