@@ -1,15 +1,14 @@
-import { RateLimitService } from './rate-limit.service.js';
 import { RateLimitExceededException } from '../errors/security.exception.js';
+import { RateLimitService } from './rate-limit.service.js';
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { GqlExecutionContext } from '@nestjs/graphql';
-import { getIp } from '@omnixys/context-ts';
+import { getIp, getRequest } from '@omnixys/context-ts';
 
 @Injectable()
 export class RateLimitGuard implements CanActivate {
   constructor(private readonly rateLimit: RateLimitService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request = getRequest(context);
     if (request.url?.startsWith('/health')) return true;
 
     const ip = getIp(context);
