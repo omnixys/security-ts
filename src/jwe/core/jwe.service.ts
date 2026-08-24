@@ -1,10 +1,18 @@
 import { KeyringProvider } from './keyring.provider.js';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
+import { OmnixysLogger } from '@omnixys/logger-ts';
 import * as jose from 'jose';
 
 @Injectable()
 export class JweService {
-  constructor(private readonly keyring: KeyringProvider) {}
+  private readonly log;
+
+  constructor(
+    private readonly keyring: KeyringProvider,
+    @Optional() private readonly logger?: OmnixysLogger,
+  ) {
+    this.log = this.logger?.log(this.constructor.name);
+  }
 
   async encrypt(payload: unknown): Promise<string> {
     const active = this.keyring.getActive();
@@ -30,6 +38,9 @@ export class JweService {
       }
     }
 
+    this.log?.error('JWE decryption failed with all keyring keys', {
+      reason: 'decryption_failed',
+    });
     throw new Error('Unable to decrypt token with any key');
   }
 }

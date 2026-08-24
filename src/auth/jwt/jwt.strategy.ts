@@ -10,6 +10,8 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
+  private readonly log;
+
   constructor(
     @Inject('JWT_OPTIONS')
     private readonly options: SecurityJwtOptions,
@@ -33,6 +35,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         jwksUri: options.jwksUri,
       }),
     });
+    this.log = this.logger?.log(this.constructor.name);
   }
 
   async validate(request: any, payload: any) {
@@ -45,11 +48,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       headerTenantId,
     );
     if (!contextPrincipal) {
-      this.logger
-        ?.child(JwtStrategy.name)
-        .warn('Verified token has no subject', {
-          reason: 'missing_subject',
-        });
+      this.log?.error('Verified token has no subject', {
+        reason: 'missing_subject',
+      });
       throw new InvalidCredentialsException('Verified token has no subject', {
         reason: 'missing_subject',
       });

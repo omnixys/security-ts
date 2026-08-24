@@ -21,11 +21,15 @@ export interface SessionIssueOptions {
 
 @Injectable()
 export class SecureSessionService {
+  private readonly log;
+
   constructor(
     private readonly jwe: JweService,
     @Inject(SECURITY_OPTIONS) private readonly options: any,
     @Optional() private readonly logger?: OmnixysLogger,
-  ) {}
+  ) {
+    this.log = this.logger?.log(this.constructor.name);
+  }
 
   async issue<T extends Record<string, unknown>>(
     payload: T,
@@ -48,7 +52,7 @@ export class SecureSessionService {
     const data = await this.jwe.decrypt<any>(token);
 
     if (data.exp && Date.now() > data.exp) {
-      this.logger?.child(SecureSessionService.name).warn('Session read rejected', {
+      this.log?.error('Session read rejected', {
         reason: 'expired',
       });
       throw new SessionExpiredException();
@@ -71,6 +75,9 @@ export class SecureSessionService {
       typeof data.iat !== 'number' ||
       typeof data.exp !== 'number'
     ) {
+      this.log?.error('Session metadata is invalid', {
+        reason: 'invalid_session_metadata',
+      });
       throw new InvalidSessionMetadataException();
     }
 

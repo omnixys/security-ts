@@ -7,6 +7,7 @@ import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 export class EncryptionService {
   private readonly key?: Buffer;
   private readonly enabled: boolean;
+  private readonly log;
 
   constructor(
     @Optional()
@@ -14,6 +15,7 @@ export class EncryptionService {
     readonly options: HashOptions = {},
     @Optional() private readonly logger?: OmnixysLogger,
   ) {
+    this.log = this.logger?.log(this.constructor.name);
     const keyTmp = options?.encryptionKey;
 
     if (!keyTmp) {
@@ -27,6 +29,10 @@ export class EncryptionService {
     const key = Buffer.from(keyTmp, 'hex');
 
     if (key.length !== 32) {
+      this.log?.error('Invalid encryption key length', {
+        expectedBytes: 32,
+        actualBytes: key.length,
+      });
       throw new Error(`Invalid encryption key length: expected 32 bytes, got ${key.length}`);
     }
 
@@ -36,6 +42,9 @@ export class EncryptionService {
 
   private getKey(): Buffer {
     if (!this.enabled || !this.key) {
+      this.log?.error('Encryption key requested but service is not configured', {
+        reason: 'missing_key',
+      });
       throw new Error('EncryptionService is not configured (missing key)');
     }
     return this.key;
@@ -83,7 +92,7 @@ export class EncryptionService {
 
       return decrypted.toString('utf8');
     } catch {
-      this.logger?.child(EncryptionService.name).warn('Decryption rejected', {
+      this.log?.error('Decryption rejected', {
         reason: 'invalid_payload_or_key',
       });
       throw new Error('Decryption failed: invalid payload or key');

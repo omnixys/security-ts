@@ -1,5 +1,7 @@
-import { ClientGrpc } from '@nestjs/microservices';
+import * as grpc from '@grpc/grpc-js';
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
+import { ClientGrpc } from '@nestjs/microservices';
+import { ValkeyService } from '@omnixys/cache-ts';
 import { ContextAccessor } from '@omnixys/context-ts';
 import type { TenantVerifier } from '@omnixys/context-ts';
 import type {
@@ -8,11 +10,8 @@ import type {
   ValidateMembershipResponse,
 } from '@omnixys/grpc-ts';
 import { TenantStatus } from '@omnixys/grpc-ts';
-import { ValkeyService } from '@omnixys/cache-ts';
-import * as grpc from '@grpc/grpc-js';
 import { lastValueFrom, type Observable } from 'rxjs';
 
-import { TENANT_GRPC_CLIENT, TENANT_VERIFICATION_OPTIONS } from '../security.constants.js';
 import {
   TenantContextUnverifiedException,
   TenantDisabledException,
@@ -21,6 +20,8 @@ import {
   TenantNotFoundException,
   TenantServiceUnavailableException,
 } from '../errors/tenant.exception.js';
+import { TENANT_GRPC_CLIENT, TENANT_VERIFICATION_OPTIONS } from '../security.constants.js';
+import { OmnixysLogger } from '@omnixys/logger-ts';
 
 export interface TenantVerificationOptions {
   /** gRPC endpoint of the tenant service, e.g. `localhost:50052`. */
@@ -47,16 +48,19 @@ const CACHE_PREFIX = 'tenant:membership';
 
 @Injectable()
 export class TenantVerifierService implements TenantVerifier {
-  private readonly logger = new Logger(TenantVerifierService.name);
+  private readonly log;
 
   constructor(
+    private readonly logger: OmnixysLogger,
     @Inject(TENANT_VERIFICATION_OPTIONS)
     private readonly options: TenantVerificationOptions,
     @Inject(TENANT_GRPC_CLIENT) private readonly grpc: ClientGrpc,
     @Optional()
     @Inject(ValkeyService)
     private readonly cache?: ValkeyService,
-  ) {}
+  ) {
+    this.log = this.logger.log(this.constructor.name);
+  }
 
   async verify(input: { userId?: string; tenantId: string }): Promise<void> {
     const { userId, tenantId } = input;
@@ -85,10 +89,8 @@ export class TenantVerifierService implements TenantVerifier {
       const hit = await this.cache.rawGet(cacheKey);
       return hit !== null;
     } catch (error) {
-      this.logger.warn(
-        `Membership cache read failed, falling back to tenant service: ${
-          (error as Error).message
-        }`,
+      this.log.warn(
+        `Membership cache read failed, falling back to tenant service: ${(error as Error).message}`,
       );
       return false;
     }
@@ -102,9 +104,7 @@ export class TenantVerifierService implements TenantVerifier {
     try {
       await this.cache.rawSet(cacheKey, '1', CACHE_TTL_SECONDS);
     } catch (error) {
-      this.logger.warn(
-        `Membership cache write failed: ${(error as Error).message}`,
-      );
+      this.log.warn(`Membership cache write failed: ${(error as Error).message}`);
     }
   }
 
@@ -123,14 +123,17 @@ export class TenantVerifierService implements TenantVerifier {
     try {
       const validateMembership = client.validateMembership as unknown as ValidateMembershipCall;
       return await lastValueFrom(
-        validateMembership(
-          { tenantId, ...(userId ? { userId } : {}) },
-          metadata,
-        ),
+        validateMembership({ tenantId, ...(userId ? { userId } : {}) }, metadata),
       );
     } catch (error) {
       const code = this.resolveGrpcCode(error);
       if (code === grpc.status.INVALID_ARGUMENT) {
+        this.log.error('Tenant membership verification rejected by tenant service', {
+          tenantId,
+          userId,
+          grpcCode: code,
+          error,
+        });
         throw new TenantContextUnverifiedException(tenantId, {
           reason: 'tenant_verification_rejected',
           grpcCode: code,
@@ -138,6 +141,12 @@ export class TenantVerifierService implements TenantVerifier {
         });
       }
 
+      this.log.error('Tenant membership verification failed, tenant service unavailable', {
+        tenantId,
+        userId,
+        grpcCode: code ?? undefined,
+        error,
+      });
       throw new TenantServiceUnavailableException(tenantId, {
         reason: 'tenant_service_unavailable',
         grpcCode: code ?? undefined,
@@ -157,15 +166,29 @@ export class TenantVerifierService implements TenantVerifier {
     } catch (error) {
       const code = this.resolveGrpcCode(error);
       if (code === grpc.status.NOT_FOUND) {
+        this.log.error('Tenant lookup failed, tenant does not exist', {
+          tenantId,
+          error,
+        });
         throw new TenantNotFoundException(tenantId, this.scopeMetadata());
       }
       if (code === grpc.status.INVALID_ARGUMENT) {
+        this.log.error('Tenant lookup rejected by tenant service', {
+          tenantId,
+          grpcCode: code,
+          error,
+        });
         throw new TenantContextUnverifiedException(tenantId, {
           reason: 'tenant_verification_rejected',
           grpcCode: code,
           ...this.scopeMetadata(),
         });
       }
+      this.log.error('Tenant lookup failed, tenant service unavailable', {
+        tenantId,
+        grpcCode: code ?? undefined,
+        error,
+      });
       throw new TenantServiceUnavailableException(tenantId, {
         reason: 'tenant_service_unavailable',
         grpcCode: code ?? undefined,
@@ -182,18 +205,30 @@ export class TenantVerifierService implements TenantVerifier {
     const metadata = this.scopeMetadata();
 
     if (!result.tenantExists) {
+      this.log.error('Tenant does not exist for membership verification', { tenantId, userId });
       throw new TenantNotFoundException(tenantId, metadata);
     }
     if (!result.tenantActive) {
+      this.log.error('Tenant is disabled, membership verification rejected', {
+        tenantId,
+        userId,
+        reason: result.reason || undefined,
+      });
       throw new TenantDisabledException(tenantId, {
         ...metadata,
         reason: result.reason || undefined,
       });
     }
     if (!result.membershipExists) {
+      this.log.error('No membership exists for user in tenant userId=%s', userId);
       throw new TenantMembershipNotFoundException(tenantId, userId, metadata);
     }
     if (!result.membershipActive) {
+      this.log.error('Membership for user in tenant is inactive', {
+        tenantId,
+        userId,
+        reason: result.reason || undefined,
+      });
       throw new TenantMembershipInactiveException(tenantId, userId, {
         ...metadata,
         reason: result.reason || undefined,
@@ -201,16 +236,18 @@ export class TenantVerifierService implements TenantVerifier {
     }
   }
 
-  private assertTenantExistsAndActive(
-    result: GetTenantResponse,
-    tenantId: string,
-  ): void {
+  private assertTenantExistsAndActive(result: GetTenantResponse, tenantId: string): void {
     const metadata = this.scopeMetadata();
 
     if (!result.tenant) {
+      this.log.error('Tenant does not exist', { tenantId });
       throw new TenantNotFoundException(tenantId, metadata);
     }
     if (result.tenant.status !== TenantStatus.ACTIVE) {
+      this.log.error('Tenant is not active', {
+        tenantId,
+        status: result.tenant.status,
+      });
       throw new TenantDisabledException(tenantId, {
         ...metadata,
         reason: result.tenant.status,

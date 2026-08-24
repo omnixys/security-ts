@@ -1,13 +1,13 @@
 import {
   Injectable,
-  Logger,
   Optional,
   type CanActivate,
   type ExecutionContext,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import type { EventPermissionKey } from '@omnixys/contracts-ts';
 import { getRequest } from '@omnixys/context-ts';
+import type { EventPermissionKey } from '@omnixys/contracts-ts';
+import { OmnixysLogger } from '@omnixys/logger-ts';
 
 import { EventAccessDeniedException } from '../../errors/event-access-denied.exception.js';
 import { RESOLVED_EVENT_ID_REQUEST_KEY } from '../decorators/current-event-id.decorator.js';
@@ -25,21 +25,22 @@ function hasEveryEventPermission(
 
 @Injectable()
 export class EventPermissionGuard implements CanActivate {
-  private readonly logger = new Logger(EventPermissionGuard.name);
   private readonly fallbackReflector = new Reflector();
+  private readonly log;
 
   constructor(
     @Optional() private readonly reflector: Reflector | undefined,
     private readonly resolver: EventPermissionResolver,
-  ) {}
+    @Optional() private readonly logger?: OmnixysLogger,
+  ) {
+    this.log = this.logger?.log(this.constructor.name);
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const reflector = this.reflector ?? this.fallbackReflector;
-    const requiredPermissions =
-      reflector.getAllAndOverride<EventPermissionKey[]>(
-        EVENT_PERMISSIONS_KEY,
-        [context.getHandler(), context.getClass()],
-      );
+    const requiredPermissions = reflector.getAllAndOverride<
+      EventPermissionKey[]
+    >(EVENT_PERMISSIONS_KEY, [context.getHandler(), context.getClass()]);
 
     if (!requiredPermissions?.length) {
       return true;
@@ -49,7 +50,7 @@ export class EventPermissionGuard implements CanActivate {
     const user = req.user;
 
     if (!user) {
-      this.logger.warn('Event permission denied: unauthenticated');
+      this.log?.error('Event permission denied: unauthenticated');
       throw new EventAccessDeniedException({
         reason: 'unauthenticated',
       });
@@ -58,7 +59,7 @@ export class EventPermissionGuard implements CanActivate {
     const eventId = extractEventId(req);
 
     if (!eventId) {
-      this.logger.warn(
+      this.log?.error(
         `Event permission denied: missing eventId for user ${user.id}`,
       );
       throw new EventAccessDeniedException({
@@ -67,9 +68,8 @@ export class EventPermissionGuard implements CanActivate {
       });
     }
 
-    (req as unknown as Record<string, unknown>)[
-      RESOLVED_EVENT_ID_REQUEST_KEY
-    ] = eventId;
+    (req as unknown as Record<string, unknown>)[RESOLVED_EVENT_ID_REQUEST_KEY] =
+      eventId;
 
     const actualPermissions = await this.resolver.getPermissionsForUser(
       user.id,
@@ -77,7 +77,7 @@ export class EventPermissionGuard implements CanActivate {
     );
 
     if (!hasEveryEventPermission(actualPermissions, requiredPermissions)) {
-      this.logger.warn(
+      this.log?.error(
         `Event permission denied: mismatch (user=${user.id}, event=${eventId}, required=${requiredPermissions.join(',')})`,
       );
 

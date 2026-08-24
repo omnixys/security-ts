@@ -14,11 +14,14 @@ import { OmnixysLogger } from '@omnixys/logger-ts';
 @Injectable()
 export class RoleGuard implements CanActivate {
   private readonly fallbackReflector = new Reflector();
+  private readonly log;
 
   constructor(
     @Optional() private readonly reflector: Reflector | undefined,
     @Optional() private readonly logger?: OmnixysLogger,
-  ) {}
+  ) {
+    this.log = this.logger?.log(this.constructor.name);
+  }
 
   canActivate(context: ExecutionContext): boolean {
     const reflector = this.reflector ?? this.fallbackReflector;
@@ -37,7 +40,7 @@ export class RoleGuard implements CanActivate {
     const user = req.user;
 
     if (!user) {
-      this.logger?.child(RoleGuard.name).warn('Role authorization denied', {
+      this.log?.error('Role authorization denied', {
         reason: 'unauthenticated',
         requiredRoles,
       });
@@ -52,7 +55,7 @@ export class RoleGuard implements CanActivate {
     const allowed = requiredRoles.some((role) => roles.includes(role));
 
     if (!allowed) {
-      this.logger?.child(RoleGuard.name).warn('Role authorization denied', {
+      this.log?.error('Role authorization denied', {
         reason: 'missing_role',
         requiredRoles,
       });

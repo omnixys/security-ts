@@ -10,11 +10,13 @@ export interface JweKey {
 export class KeyringProvider {
   private readonly keys: JweKey[] = [];
   private readonly enabled: boolean;
+  private readonly log;
 
   constructor(
     keys?: JweKey[],
     @Optional() private readonly logger?: OmnixysLogger,
   ) {
+    this.log = this.logger?.log(this.constructor.name);
     if (!keys || keys.length === 0) {
       this.enabled = false;
       this.logger?.child(KeyringProvider.name).warn('JWE keyring is disabled', {
@@ -29,6 +31,9 @@ export class KeyringProvider {
 
   private assertEnabled(): void {
     if (!this.enabled || this.keys.length === 0) {
+      this.log?.error('JWE keyring requested but not configured', {
+        reason: 'missing_keys',
+      });
       throw new Error('KeyringProvider is not configured (no keys)');
     }
   }

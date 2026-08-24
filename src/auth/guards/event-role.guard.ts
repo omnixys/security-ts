@@ -1,38 +1,40 @@
 import {
   Injectable,
-  Logger,
   Optional,
   type CanActivate,
   type ExecutionContext,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
-import { EventRoleType } from '@omnixys/contracts-ts';
 import { getRequest } from '@omnixys/context-ts';
+import { EventRoleType } from '@omnixys/contracts-ts';
+import { OmnixysLogger } from '@omnixys/logger-ts';
 
 import { EventAccessDeniedException } from '../../errors/event-access-denied.exception.js';
 import { RESOLVED_EVENT_ID_REQUEST_KEY } from '../decorators/current-event-id.decorator.js';
 import { EVENT_ROLES_KEY } from '../decorators/event-roles.decorator.js';
-import { EventRoleResolver } from './event-role-resolver.js';
 import { extractEventId } from '../utils/extract-event-id.util.js';
+import { EventRoleResolver } from './event-role-resolver.js';
 
 @Injectable()
 export class EventRoleGuard implements CanActivate {
-  private readonly logger = new Logger(EventRoleGuard.name);
   private readonly fallbackReflector = new Reflector();
+  private readonly log;
 
   constructor(
     @Optional() private readonly reflector: Reflector | undefined,
     private readonly resolver: EventRoleResolver,
-  ) {}
+    @Optional() private readonly logger?: OmnixysLogger,
+  ) {
+    this.log = this.logger?.log(this.constructor.name);
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const reflector = this.reflector ?? this.fallbackReflector;
-    const requiredRoles =
-      reflector.getAllAndOverride<EventRoleType[]>(
-        EVENT_ROLES_KEY,
-        [context.getHandler(), context.getClass()],
-      );
+    const requiredRoles = reflector.getAllAndOverride<EventRoleType[]>(
+      EVENT_ROLES_KEY,
+      [context.getHandler(), context.getClass()],
+    );
 
     if (!requiredRoles?.length) {
       return true;
@@ -42,7 +44,7 @@ export class EventRoleGuard implements CanActivate {
     const user = req.user;
 
     if (!user) {
-      this.logger.warn('Event authorization denied: unauthenticated');
+      this.log?.error('Event authorization denied: unauthenticated');
 
       throw new EventAccessDeniedException({
         reason: 'unauthenticated',
@@ -52,7 +54,7 @@ export class EventRoleGuard implements CanActivate {
     const eventId = extractEventId(req);
 
     if (!eventId) {
-      this.logger.warn(
+      this.log?.error(
         `Event authorization denied: missing eventId for user ${user.id}`,
       );
 
@@ -62,17 +64,13 @@ export class EventRoleGuard implements CanActivate {
       });
     }
 
-    (req as unknown as Record<string, unknown>)[
-      RESOLVED_EVENT_ID_REQUEST_KEY
-    ] = eventId;
+    (req as unknown as Record<string, unknown>)[RESOLVED_EVENT_ID_REQUEST_KEY] =
+      eventId;
 
-    const role = await this.resolver.getRoleForUser(
-      user.id,
-      eventId,
-    );
+    const role = await this.resolver.getRoleForUser(user.id, eventId);
 
     if (!role) {
-      this.logger.warn(
+      this.log?.error(
         `Event authorization denied: role projection missing (user=${user.id}, event=${eventId})`,
       );
 
@@ -86,7 +84,7 @@ export class EventRoleGuard implements CanActivate {
     }
 
     if (!requiredRoles.includes(role)) {
-      this.logger.warn(
+      this.log?.error(
         `Event authorization denied: role mismatch (user=${user.id}, event=${eventId}, actual=${role}, required=${requiredRoles.join(',')})`,
       );
 

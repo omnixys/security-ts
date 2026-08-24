@@ -12,6 +12,7 @@ type HmacPurpose = 'resetToken' | 'deviceFingerprint' | 'magicLink';
 @Injectable()
 export class HmacService {
   private readonly keys: Partial<Record<HmacPurpose, Buffer>> = {};
+  private readonly log;
 
   constructor(
     @Optional()
@@ -19,6 +20,7 @@ export class HmacService {
     readonly hashOption: HashOptions = {},
     @Optional() private readonly logger?: OmnixysLogger,
   ) {
+    this.log = this.logger?.log(this.constructor.name);
     this.initKey('resetToken', hashOption.hmacResetToken, 'RESET_TOKEN_HMAC_SECRET');
     this.initKey(
       'deviceFingerprint',
@@ -44,6 +46,7 @@ export class HmacService {
     const key = this.keys[purpose];
 
     if (!key) {
+      this.log?.error('HMAC key requested but not configured', { purpose });
       throw new Error(`HMAC key for "${purpose}" is not configured`);
     }
 

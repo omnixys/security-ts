@@ -18,12 +18,16 @@ export interface TokenCookieLifetimeOverrides {
 /** Security-owned policy for distinct access-token and refresh-token cookies. */
 @Injectable()
 export class TokenCookieService {
+  private readonly log;
+
   constructor(
     @Inject(SECURITY_OPTIONS)
     private readonly options: SecurityModuleOptions,
     private readonly cookies: CookieService,
     @Optional() private readonly logger?: OmnixysLogger,
-  ) {}
+  ) {
+    this.log = this.logger?.log(this.constructor.name);
+  }
 
   setTokens(
     reply: FastifyReply,
@@ -54,9 +58,7 @@ export class TokenCookieService {
 
   private cookieOptions(maxAgeMs: number | undefined) {
     if (maxAgeMs !== undefined && (!Number.isFinite(maxAgeMs) || maxAgeMs < 0)) {
-      this.logger
-        ?.child(TokenCookieService.name)
-        .error('Token cookie policy rejected', { reason: 'invalid_max_age' });
+      this.log?.error('Token cookie policy rejected', { reason: 'invalid_max_age' });
       throw new RangeError('Token cookie maxAgeMs must be a finite non-negative value');
     }
 
