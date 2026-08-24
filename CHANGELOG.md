@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.1.0](https://github.com/omnixys/security-ts/compare/v4.0.4...v4.1.0) (2026-08-24)
+
+### Context
+
+* **Context:** update dependency ([](https://github.com/omnixys/security-ts/commit/8685cbba89b2d8120abd1c240c1b10f54f41e089))
+
+### Security
+
+* **Security:** log errors via OmnixysLogger on all exception paths ([](https://github.com/omnixys/security-ts/commit/91c93baef24a7014dfe590de4944060b251aa993))
+
 ## [4.0.4](https://github.com/omnixys/security-ts/compare/v4.0.3...v4.0.4) (2026-08-23)
 
 ### Deps
