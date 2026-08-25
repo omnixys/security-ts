@@ -73,10 +73,6 @@ export function extractEventId(req: any): string | null {
     return vars.eventId;
   }
 
-  if (typeof vars.id === 'string') {
-    return vars.id;
-  }
-
   if (
     vars.input &&
     typeof vars.input === 'object' &&
