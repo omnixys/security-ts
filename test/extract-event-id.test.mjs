@@ -32,6 +32,27 @@ test('extractEventId ignores a resource id and uses the active event cookie', ()
   assert.equal(result, 'event-from-cookie');
 });
 
+test('extractEventId uses the active event header before the cookie fallback', () => {
+  const result = extractEventId({
+    body: { variables: { id: 'invitation-id' } },
+    headers: {
+      'x-active-event-id': 'event-from-header',
+      cookie: `activeEvent=${encodeURIComponent(JSON.stringify({ id: 'event-from-cookie' }))}`,
+    },
+  });
+
+  assert.equal(result, 'event-from-header');
+});
+
+test('extractEventId prefers explicit GraphQL event ids over the active event header', () => {
+  const result = extractEventId({
+    body: { variables: { eventId: 'event-from-vars' } },
+    headers: { 'x-active-event-id': 'event-from-header' },
+  });
+
+  assert.equal(result, 'event-from-vars');
+});
+
 test('extractEventId does not treat a resource id as an event id', () => {
   const result = extractEventId({
     body: {

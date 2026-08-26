@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 const ACTIVE_EVENT_COOKIE = 'activeEvent';
+const ACTIVE_EVENT_HEADER = 'x-active-event-id';
 
 function readCookie(req: any, name: string): string | undefined {
   const parsed = req.cookies?.[name];
@@ -66,6 +67,13 @@ function parseActiveEventCookie(raw: string | undefined): string | null {
   return null;
 }
 
+function readActiveEventHeader(req: any): string | null {
+  const value = req.headers?.[ACTIVE_EVENT_HEADER];
+  const header = Array.isArray(value) ? value[0] : value;
+
+  return typeof header === 'string' && header.trim() ? header.trim() : null;
+}
+
 export function extractEventId(req: any): string | null {
   const vars = req.body?.variables ?? {};
 
@@ -99,6 +107,12 @@ export function extractEventId(req: any): string | null {
     typeof vars.filter.eventId === 'string'
   ) {
     return vars.filter.eventId;
+  }
+
+  const activeEventHeader = readActiveEventHeader(req);
+
+  if (activeEventHeader) {
+    return activeEventHeader;
   }
 
   return parseActiveEventCookie(readCookie(req, ACTIVE_EVENT_COOKIE));
