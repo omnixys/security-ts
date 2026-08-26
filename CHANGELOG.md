@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.1.2](https://github.com/omnixys/security-ts/compare/v4.1.1...v4.1.2) (2026-08-26)
+
+### Auth
+
+* **Auth:** resolve event context from request header ([](https://github.com/omnixys/security-ts/commit/bca4563ecfe4b9a4e89df3faeca5510288cbaba8))
+
 ## [4.1.1](https://github.com/omnixys/security-ts/compare/v4.1.0...v4.1.1) (2026-08-26)
 
 ### Security
