@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.1.1](https://github.com/omnixys/security-ts/compare/v4.1.0...v4.1.1) (2026-08-26)
+
+### Security
+
+* **Security:** avoid treating resource ids as event ids ([](https://github.com/omnixys/security-ts/commit/57dcfd04ee3e1e675635c448f7c4233f6439f49c))
+
 ## [4.1.0](https://github.com/omnixys/security-ts/compare/v4.0.4...v4.1.0) (2026-08-24)
 
 ### Context
