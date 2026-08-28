@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.1.3](https://github.com/omnixys/security-ts/compare/v4.1.2...v4.1.3) (2026-08-28)
+
+### Deps
+
+* **Deps:** update contracts-ts ([](https://github.com/omnixys/security-ts/commit/60ec2925e8d2e6c969183701b42e58ad8075246d))
+
 ## [4.1.2](https://github.com/omnixys/security-ts/compare/v4.1.1...v4.1.2) (2026-08-26)
 
 ### Auth
