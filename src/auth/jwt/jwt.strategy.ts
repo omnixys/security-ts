@@ -4,6 +4,7 @@ import { SecurityPrincipalResolver } from '../context/security-principal.resolve
 import { extractUserRoles } from '../utils/extract-roles.util.js';
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
+import { OMNIXYS_USER_ID_CLAIM } from '@omnixys/contracts-ts';
 import { OmnixysLogger } from '@omnixys/logger-ts';
 import jwksRsa from 'jwks-rsa';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -57,7 +58,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     return {
-      id: payload.sub,
+      id: contextPrincipal.userId ?? contextPrincipal.actorId,
       username: payload.preferred_username,
       email: payload.email,
       roles,
