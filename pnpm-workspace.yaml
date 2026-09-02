@@ -1,3 +1,8 @@
+allowBuilds:
+  '@swc/core': true
+  argon2: true
+  esbuild: true
+  protobufjs: true
 peerDependencyRules:
   ignoreMissing:
     - '@omnixys/security-ts'
