@@ -3,6 +3,34 @@
 All notable changes in this project will be documented in this file.
 
 
+## [5.0.0](https://github.com/omnixys/security-ts/compare/v4.1.3...v5.0.0) (2026-09-02)
+
+### Auth
+
+* **Auth:** resolve internal user id from claim and classify principals ([](https://github.com/omnixys/security-ts/commit/a875798563ed00b817d7159d92e0f260c8e5090b))
+
+### Ci
+
+* **Ci:** add missing labeler and dependabot config to match contracts ([](https://github.com/omnixys/security-ts/commit/b259ec65ee1b9f0ad5f40b556fa91d4cea7ef9f7))
+* **Ci:** add PR build check workflow for main ([](https://github.com/omnixys/security-ts/commit/714c061227929a4a734ade46b88f1ea0aca5d905))
+* **Ci:** add npm registry auth before install in release workflow ([](https://github.com/omnixys/security-ts/commit/97beb1410f053e9e49dc9385ac67f2361b1b3988))
+
+### Deps
+
+* **Deps:** update omnixys deps ([](https://github.com/omnixys/security-ts/commit/0f3818078fade2a3993b27684daf2f4143db92f8))
+
+### Identity
+
+* **Identity:** reject tokens without internal user id in jwt strategy ([](https://github.com/omnixys/security-ts/commit/9beea5a1028e5c88c98c0e5af4e9359dd9a5568c))
+
+### Other
+
+* **Other:** Merge pull request #1 from omnixys/migration/uuid-v7 ([](https://github.com/omnixys/security-ts/commit/fda0e88b496c1f7adb890547cf0759dc18e215d0)), closes [#1](https://github.com/omnixys/security-ts/issues/1)
+
+### Runtime
+
+* **Runtime:** require node 26.8.1 and pnpm 11.24.0 ([](https://github.com/omnixys/security-ts/commit/4b0c333ebbf649cc8be7ad1f813cf3389ec2e303))
+
 ## [4.1.3](https://github.com/omnixys/security-ts/compare/v4.1.2...v4.1.3) (2026-08-28)
 
 ### Deps
