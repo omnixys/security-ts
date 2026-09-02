@@ -6,14 +6,16 @@ import {
   UnauthorizedTenantException,
 } from '../dist/index.js';
 import { ContextAccessor } from '@omnixys/context-ts';
+import { OMNIXYS_USER_ID_CLAIM } from '@omnixys/contracts-ts';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-test('maps only verified identity metadata into PrincipalContext', () => {
+test('maps a verified USER token into PrincipalContext (sub=K, userId=actorId=U)', () => {
   const resolver = new SecurityPrincipalResolver();
   const principal = resolver.fromVerifiedJwt(
     {
-      sub: 'subject-1',
+      sub: 'keycloak-subject',
+      [OMNIXYS_USER_ID_CLAIM]: '0195a2f0-0000-7000-8000-000000000001',
       tenant_ids: ['tenant-1'],
       sid: 'session-1',
       acr: 'mfa',
@@ -25,9 +27,10 @@ test('maps only verified identity metadata into PrincipalContext', () => {
   );
 
   assert.deepEqual(principal, {
-    subject: 'subject-1',
-    actorId: 'subject-1',
-    userId: 'subject-1',
+    subject: 'keycloak-subject',
+    principalType: 'USER',
+    actorId: '0195a2f0-0000-7000-8000-000000000001',
+    userId: '0195a2f0-0000-7000-8000-000000000001',
     tenantId: 'tenant-1',
     roles: ['admin'],
     sessionId: 'session-1',
@@ -41,7 +44,11 @@ test('maps only verified identity metadata into PrincipalContext', () => {
 test('does not interpret Keycloak azp as a tenant', () => {
   const resolver = new SecurityPrincipalResolver();
   const principal = resolver.fromVerifiedJwt(
-    { sub: 'subject-1', azp: 'frontend-client' },
+    {
+      sub: 'keycloak-subject',
+      azp: 'frontend-client',
+      [OMNIXYS_USER_ID_CLAIM]: '0195a2f0-0000-7000-8000-000000000001',
+    },
     [],
   );
 
@@ -52,11 +59,12 @@ test('prefers auth_time and accepts Keycloak session_state metadata', () => {
   const resolver = new SecurityPrincipalResolver();
   const principal = resolver.fromVerifiedJwt(
     {
-      sub: 'subject-1',
+      sub: 'keycloak-subject',
       session_state: 'session-state-1',
       auth_time: 1_700_000_050,
       iat: 1_700_000_100,
       acr: 'urn:mfa',
+      [OMNIXYS_USER_ID_CLAIM]: '0195a2f0-0000-7000-8000-000000000001',
     },
     [],
   );
@@ -70,9 +78,10 @@ test('uses only a configured verified tenant claim', () => {
   const resolver = new SecurityPrincipalResolver();
   const principal = resolver.fromVerifiedJwt(
     {
-      sub: 'subject-1',
+      sub: 'keycloak-subject',
       tenant_ids: ['ignored-default'],
       organization_id: 'trusted-organization',
+      [OMNIXYS_USER_ID_CLAIM]: '0195a2f0-0000-7000-8000-000000000001',
     },
     [],
     'organization_id',
@@ -97,8 +106,9 @@ test('rejects a verified token whose header tenant is not in tenant_ids', () => 
         () =>
           resolver.fromVerifiedJwt(
             {
-              sub: 'subject-1',
+              sub: 'keycloak-subject',
               tenant_ids: ['tenant-a', 'tenant-b'],
+              [OMNIXYS_USER_ID_CLAIM]: '0195a2f0-0000-7000-8000-000000000001',
             },
             [],
             undefined,
@@ -119,17 +129,51 @@ test('rejects a verified token whose header tenant is not in tenant_ids', () => 
   );
 });
 
-test('JwtStrategy preserves its legacy user result and adds contextPrincipal', async () => {
+test('fails closed when a USER token has no omnixys_user_id claim', () => {
+  const resolver = new SecurityPrincipalResolver();
+  const principal = resolver.fromVerifiedJwt(
+    { sub: 'keycloak-subject', realm_access: { roles: [] } },
+    [],
+  );
+
+  assert.equal(principal, undefined);
+});
+
+test('maps a SERVICE token via explicit hint (userId=null, actorId=subject transitional)', () => {
+  const resolver = new SecurityPrincipalResolver();
+  const principal = resolver.fromVerifiedJwt(
+    { sub: 'keycloak-service-subject', azp: 'mcp-client', client_id: 'mcp-client' },
+    [],
+    undefined,
+    undefined,
+    { principalType: 'SERVICE' },
+  );
+
+  assert.deepEqual(principal, {
+    subject: 'keycloak-service-subject',
+    principalType: 'SERVICE',
+    actorId: 'keycloak-service-subject',
+    tenantId: undefined,
+    roles: [],
+    sessionId: undefined,
+    authStrength: undefined,
+    authenticatedAtEpochMs: undefined,
+  });
+  assert.equal(principal.userId, undefined);
+});
+
+test('JwtStrategy resolves user.id to internal U and keeps sub in raw', async () => {
   const strategy = new JwtStrategy({
     issuer: 'https://identity.example.com/realms/test',
     jwksUri: 'https://identity.example.com/realms/test/certs',
   });
   const payload = {
-    sub: 'subject-1',
+    sub: 'keycloak-subject',
     preferred_username: 'tester',
     email: 'tester@example.com',
     tenant_ids: ['tenant-1'],
     realm_access: { roles: ['admin'] },
+    [OMNIXYS_USER_ID_CLAIM]: '0195a2f0-0000-7000-8000-000000000001',
   };
 
   const user = await strategy.validate(
@@ -137,12 +181,48 @@ test('JwtStrategy preserves its legacy user result and adds contextPrincipal', a
     payload,
   );
 
-  assert.equal(user.id, 'subject-1');
+  assert.equal(user.id, '0195a2f0-0000-7000-8000-000000000001');
   assert.equal(user.username, 'tester');
   assert.equal(user.email, 'tester@example.com');
   assert.equal(user.raw, payload);
-  assert.equal(user.contextPrincipal.subject, 'subject-1');
+  assert.equal(user.contextPrincipal.subject, 'keycloak-subject');
+  assert.equal(user.contextPrincipal.userId, '0195a2f0-0000-7000-8000-000000000001');
   assert.equal(user.contextPrincipal.tenantId, 'tenant-1');
+});
+
+test('JwtStrategy rejects a token without an omnixys_user_id (fail-closed)', async () => {
+  const strategy = new JwtStrategy({
+    issuer: 'https://identity.example.com/realms/test',
+    jwksUri: 'https://identity.example.com/realms/test/certs',
+  });
+
+  await assert.rejects(
+    strategy.validate(
+      { headers: { 'x-tenant-id': 'tenant-1' } },
+      { sub: 'keycloak-subject', realm_access: { roles: [] } },
+    ),
+    InvalidCredentialsException,
+  );
+});
+
+test('JwtStrategy never aliases a SERVICE subject (K) as user.id', async () => {
+  const strategy = new JwtStrategy({
+    issuer: 'https://identity.example.com/realms/test',
+    jwksUri: 'https://identity.example.com/realms/test/certs',
+  });
+
+  await assert.rejects(
+    strategy.validate(
+      { headers: {} },
+      {
+        sub: 'keycloak-service-subject',
+        client_id: 'mcp-client',
+        azp: 'mcp-client',
+        realm_access: { roles: [] },
+      },
+    ),
+    InvalidCredentialsException,
+  );
 });
 
 test('JwtStrategy rejects a verified token without a principal subject', async () => {
@@ -159,21 +239,23 @@ test('JwtStrategy rejects a verified token without a principal subject', async (
 
 test('CurrentUser supports bearer-authenticated requests without cookies', () => {
   const raw = {
-    sub: 'subject-1',
+    sub: 'keycloak-subject',
     preferred_username: 'tester',
     email: 'tester@example.com',
     given_name: 'Test',
     family_name: 'User',
     realm_access: { roles: ['USER'] },
+    [OMNIXYS_USER_ID_CLAIM]: '0195a2f0-0000-7000-8000-000000000001',
   };
   const current = resolveCurrentUser({
     user: {
       ...raw,
+      id: '0195a2f0-0000-7000-8000-000000000001',
       raw,
     },
   });
 
-  assert.equal(current.id, 'subject-1');
+  assert.equal(current.id, '0195a2f0-0000-7000-8000-000000000001');
   assert.equal(current.username, 'tester');
   assert.equal(current.access_token, undefined);
   assert.equal(current.refresh_token, undefined);

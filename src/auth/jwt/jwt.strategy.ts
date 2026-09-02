@@ -4,6 +4,7 @@ import { SecurityPrincipalResolver } from '../context/security-principal.resolve
 import { extractUserRoles } from '../utils/extract-roles.util.js';
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
+import { OMNIXYS_USER_ID_CLAIM } from '@omnixys/contracts-ts';
 import { OmnixysLogger } from '@omnixys/logger-ts';
 import jwksRsa from 'jwks-rsa';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -56,8 +57,23 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       });
     }
 
+    // The HTTP user-auth path only yields USER tokens (fail-closed without the
+    // `omnixys_user_id` claim). `id` must always be the internal U — never the
+    // Keycloak subject (K). If a SERVICE token ever reaches this strategy, its
+    // userId is absent, so it must be rejected instead of aliasing actorId=K.
+    if (!contextPrincipal.userId) {
+      this.log?.error('Verified token carries no internal user id', {
+        reason: 'missing_user_claim',
+        principalType: contextPrincipal.principalType,
+      });
+      throw new InvalidCredentialsException(
+        'Verified token carries no internal user id',
+        { reason: 'missing_user_claim' },
+      );
+    }
+
     return {
-      id: payload.sub,
+      id: contextPrincipal.userId,
       username: payload.preferred_username,
       email: payload.email,
       roles,

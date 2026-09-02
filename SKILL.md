@@ -9,7 +9,7 @@
 
 - Kind: Shared Package
 - Package: `@omnixys/security-ts` (version: 4.0.0)
-- Runtime: Node >=20 (pnpm >=10.33.0)
+- Runtime: Node >=26.8.1 (pnpm >=11.24.0)
 - Description: Omnixys security primitives for TypeScript (JWT, auth, hashing).
 - Architecture: src/ security primitives
 - Database: n/a; Migrations: n/a

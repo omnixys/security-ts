@@ -4,6 +4,7 @@ import type {
   PrincipalResolutionInput,
   PrincipalResolver,
 } from '@omnixys/context-ts';
+import { OMNIXYS_USER_ID_CLAIM, PrincipalType } from '@omnixys/contracts-ts';
 
 export interface VerifiedJwtPrincipalClaims {
   readonly [claim: string]: unknown;
@@ -15,6 +16,17 @@ export interface VerifiedJwtPrincipalClaims {
   readonly acr?: unknown;
   readonly auth_time?: unknown;
   readonly iat?: unknown;
+}
+
+export interface PrincipalTypeHint {
+  /**
+   * Explicitly declares the principal kind when the caller already knows the
+   * token is a service/machine token (e.g. an OAuth client / MCP client token).
+   * When omitted, the resolver classifies USER tokens by the presence of the
+   * `omnixys_user_id` claim and fails closed (returns undefined) for any token
+   * that carries neither a user U claim nor an explicit SERVICE hint.
+   */
+  readonly principalType?: PrincipalType;
 }
 
 /**
@@ -33,6 +45,7 @@ export class SecurityPrincipalResolver implements PrincipalResolver {
     roles: readonly string[],
     tenantClaim?: string,
     headerTenantId?: string,
+    hint?: PrincipalTypeHint,
   ): PrincipalContext | undefined {
     const subject = stringClaim(claims.sub);
     if (!subject) return undefined;
@@ -40,16 +53,42 @@ export class SecurityPrincipalResolver implements PrincipalResolver {
     const tenantId = resolveTenantClaim(claims, tenantClaim, headerTenantId);
     const authenticatedAt = numericDateClaim(claims.auth_time ?? claims.iat);
 
-    return {
-      subject,
-      actorId: subject,
-      userId: subject,
-      tenantId,
-      roles: [...roles],
-      sessionId: stringClaim(claims.sid) ?? stringClaim(claims.session_state),
-      authStrength: stringClaim(claims.acr),
-      authenticatedAtEpochMs: authenticatedAt,
-    };
+    const userId = stringClaim(claims[OMNIXYS_USER_ID_CLAIM]);
+
+    if (userId) {
+      return {
+        subject,
+        principalType: PrincipalType.USER,
+        userId,
+        actorId: userId,
+        tenantId,
+        roles: [...roles],
+        sessionId: stringClaim(claims.sid) ?? stringClaim(claims.session_state),
+        authStrength: stringClaim(claims.acr),
+        authenticatedAtEpochMs: authenticatedAt,
+      };
+    }
+
+    if (hint?.principalType === PrincipalType.SERVICE) {
+      // Transitional compatibility path (Phase 4 Teil 0): machine / service /
+      // agent principal is NOT a user and must never receive a fabricated U.
+      // TODO(arch): introduce a dedicated Service-Principal domain (S = UUIDv7)
+      // with serviceId = S, actorId = S and stop aliasing actorId = subject.
+      return {
+        subject,
+        principalType: PrincipalType.SERVICE,
+        actorId: subject,
+        tenantId,
+        roles: [...roles],
+        sessionId: stringClaim(claims.sid) ?? stringClaim(claims.session_state),
+        authStrength: stringClaim(claims.acr),
+        authenticatedAtEpochMs: authenticatedAt,
+      };
+    }
+
+    // Fail-closed: a token that is neither a user token (no omnixys_user_id
+    // claim) nor an explicitly-declared service token is rejected.
+    return undefined;
   }
 }
 
@@ -100,6 +139,8 @@ function isPrincipalContext(value: unknown): value is PrincipalContext {
   return (
     typeof value.subject === 'string' &&
     value.subject.length > 0 &&
+    (value.principalType === PrincipalType.USER ||
+      value.principalType === PrincipalType.SERVICE) &&
     Array.isArray(value.roles) &&
     value.roles.every((role) => typeof role === 'string')
   );
