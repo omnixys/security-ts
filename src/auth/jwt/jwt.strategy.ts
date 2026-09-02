@@ -57,8 +57,23 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       });
     }
 
+    // The HTTP user-auth path only yields USER tokens (fail-closed without the
+    // `omnixys_user_id` claim). `id` must always be the internal U — never the
+    // Keycloak subject (K). If a SERVICE token ever reaches this strategy, its
+    // userId is absent, so it must be rejected instead of aliasing actorId=K.
+    if (!contextPrincipal.userId) {
+      this.log?.error('Verified token carries no internal user id', {
+        reason: 'missing_user_claim',
+        principalType: contextPrincipal.principalType,
+      });
+      throw new InvalidCredentialsException(
+        'Verified token carries no internal user id',
+        { reason: 'missing_user_claim' },
+      );
+    }
+
     return {
-      id: contextPrincipal.userId ?? contextPrincipal.actorId,
+      id: contextPrincipal.userId,
       username: payload.preferred_username,
       email: payload.email,
       roles,

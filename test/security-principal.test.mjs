@@ -205,6 +205,26 @@ test('JwtStrategy rejects a token without an omnixys_user_id (fail-closed)', asy
   );
 });
 
+test('JwtStrategy never aliases a SERVICE subject (K) as user.id', async () => {
+  const strategy = new JwtStrategy({
+    issuer: 'https://identity.example.com/realms/test',
+    jwksUri: 'https://identity.example.com/realms/test/certs',
+  });
+
+  await assert.rejects(
+    strategy.validate(
+      { headers: {} },
+      {
+        sub: 'keycloak-service-subject',
+        client_id: 'mcp-client',
+        azp: 'mcp-client',
+        realm_access: { roles: [] },
+      },
+    ),
+    InvalidCredentialsException,
+  );
+});
+
 test('JwtStrategy rejects a verified token without a principal subject', async () => {
   const strategy = new JwtStrategy({
     issuer: 'https://identity.example.com/realms/test',
