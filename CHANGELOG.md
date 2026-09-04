@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [5.1.0](https://github.com/omnixys/security-ts/compare/v5.0.0...v5.1.0) (2026-09-04)
+
+### Log
+
+* **Log:** add logger ([](https://github.com/omnixys/security-ts/commit/7d7a6230322f6e47ff3c459750d70b97dba16e8c))
+
 ## [5.0.0](https://github.com/omnixys/security-ts/compare/v4.1.3...v5.0.0) (2026-09-02)
 
 ### Auth

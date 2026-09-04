@@ -1,6 +1,6 @@
 {
   "name": "@omnixys/security-ts",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "Enterprise-grade security module for Omnixys microservices. Provides authentication (JWT/Keycloak), JWE encryption, session handling, role-based access control, rate limiting, and hashing utilities.",
   "type": "module",
   "main": "dist/index.js",
