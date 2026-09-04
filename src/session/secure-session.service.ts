@@ -28,7 +28,7 @@ export class SecureSessionService {
     @Inject(SECURITY_OPTIONS) private readonly options: any,
     @Optional() private readonly logger?: OmnixysLogger,
   ) {
-    this.log = this.logger?.log(this.constructor.name);
+    this.log = this.logger?.log(this.constructor.name, 'package:@omnixys/security-ts');
   }
 
   async issue<T extends Record<string, unknown>>(

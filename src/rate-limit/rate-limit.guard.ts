@@ -17,7 +17,7 @@ export class RateLimitGuard implements CanActivate {
     private readonly rateLimit: RateLimitService,
     @Optional() private readonly logger?: OmnixysLogger,
   ) {
-    this.log = this.logger?.log(this.constructor.name);
+    this.log = this.logger?.log(this.constructor.name, 'package:@omnixys/security-ts');
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

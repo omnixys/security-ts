@@ -11,7 +11,7 @@ export class JweService {
     private readonly keyring: KeyringProvider,
     @Optional() private readonly logger?: OmnixysLogger,
   ) {
-    this.log = this.logger?.log(this.constructor.name);
+    this.log = this.logger?.log(this.constructor.name, 'package:@omnixys/security-ts');
   }
 
   async encrypt(payload: unknown): Promise<string> {

@@ -15,7 +15,7 @@ export class EncryptionService {
     readonly options: HashOptions = {},
     @Optional() private readonly logger?: OmnixysLogger,
   ) {
-    this.log = this.logger?.log(this.constructor.name);
+    this.log = this.logger?.log(this.constructor.name, 'package:@omnixys/security-ts');
     const keyTmp = options?.encryptionKey;
 
     if (!keyTmp) {

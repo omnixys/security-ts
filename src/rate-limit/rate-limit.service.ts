@@ -29,7 +29,7 @@ export class RateLimitService {
     @Optional()
     private readonly loggerService?: OmnixysLogger,
   ) {
-    this.logger = this.loggerService?.log(RateLimitService.name);
+    this.logger = this.loggerService?.log(RateLimitService.name, 'package:@omnixys/security-ts');
   }
 
   async isAllowed(key: string): Promise<RateLimitResult> {

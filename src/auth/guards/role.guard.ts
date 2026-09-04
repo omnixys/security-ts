@@ -20,7 +20,7 @@ export class RoleGuard implements CanActivate {
     @Optional() private readonly reflector: Reflector | undefined,
     @Optional() private readonly logger?: OmnixysLogger,
   ) {
-    this.log = this.logger?.log(this.constructor.name);
+    this.log = this.logger?.log(this.constructor.name, 'package:@omnixys/security-ts');
   }
 
   canActivate(context: ExecutionContext): boolean {

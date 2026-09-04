@@ -59,7 +59,7 @@ export class TenantVerifierService implements TenantVerifier {
     @Inject(ValkeyService)
     private readonly cache?: ValkeyService,
   ) {
-    this.log = this.logger.log(this.constructor.name);
+    this.log = this.logger.log(this.constructor.name, 'package:@omnixys/security-ts');
   }
 
   async verify(input: { userId?: string; tenantId: string }): Promise<void> {

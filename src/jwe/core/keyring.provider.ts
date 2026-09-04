@@ -16,7 +16,7 @@ export class KeyringProvider {
     keys?: JweKey[],
     @Optional() private readonly logger?: OmnixysLogger,
   ) {
-    this.log = this.logger?.log(this.constructor.name);
+    this.log = this.logger?.log(this.constructor.name, 'package:@omnixys/security-ts');
     if (!keys || keys.length === 0) {
       this.enabled = false;
       this.logger?.child(KeyringProvider.name).warn('JWE keyring is disabled', {

@@ -26,7 +26,7 @@ export class TokenCookieService {
     private readonly cookies: CookieService,
     @Optional() private readonly logger?: OmnixysLogger,
   ) {
-    this.log = this.logger?.log(this.constructor.name);
+    this.log = this.logger?.log(this.constructor.name, 'package:@omnixys/security-ts');
   }
 
   setTokens(

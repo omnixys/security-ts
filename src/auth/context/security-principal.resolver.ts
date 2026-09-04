@@ -1,3 +1,4 @@
+import { Optional } from '@nestjs/common';
 import { UnauthorizedTenantException } from '../../errors/security.exception.js';
 import type {
   PrincipalContext,
@@ -5,6 +6,7 @@ import type {
   PrincipalResolver,
 } from '@omnixys/context-ts';
 import { OMNIXYS_USER_ID_CLAIM, PrincipalType } from '@omnixys/contracts-ts';
+import { OmnixysLogger } from '@omnixys/logger-ts';
 
 export interface VerifiedJwtPrincipalClaims {
   readonly [claim: string]: unknown;
@@ -34,6 +36,16 @@ export interface PrincipalTypeHint {
  * principal metadata. This class never verifies or decodes a token itself.
  */
 export class SecurityPrincipalResolver implements PrincipalResolver {
+  private readonly log;
+
+    constructor(
+      @Optional()
+      private readonly logger?: OmnixysLogger,
+    ) {
+      this.log = this.logger?.log(this.constructor.name, 'package:@omnixys/security-ts');
+    }
+  
+
   resolve(input: PrincipalResolutionInput): PrincipalContext | undefined {
     return isPrincipalContext(input.verifiedPrincipal)
       ? input.verifiedPrincipal
@@ -47,6 +59,7 @@ export class SecurityPrincipalResolver implements PrincipalResolver {
     headerTenantId?: string,
     hint?: PrincipalTypeHint,
   ): PrincipalContext | undefined {
+    this.log?.debug('claims: %o', claims);
     const subject = stringClaim(claims.sub);
     if (!subject) return undefined;
 

@@ -36,7 +36,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         jwksUri: options.jwksUri,
       }),
     });
-    this.log = this.logger?.log(this.constructor.name);
+    this.log = this.logger?.log(this.constructor.name, 'package:@omnixys/security-ts');
   }
 
   async validate(request: any, payload: any) {
@@ -48,6 +48,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       this.options.tenantClaim,
       headerTenantId,
     );
+    
     if (!contextPrincipal) {
       this.log?.error('Verified token has no subject', {
         reason: 'missing_subject',

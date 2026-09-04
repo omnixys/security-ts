@@ -9,7 +9,7 @@ export class KeyProvider {
     private readonly raw: string,
     @Optional() private readonly logger?: OmnixysLogger,
   ) {
-    this.log = this.logger?.log(this.constructor.name);
+    this.log = this.logger?.log(this.constructor.name, 'package:@omnixys/security-ts');
   }
 
   getKey(): Uint8Array {

@@ -20,7 +20,7 @@ export class HmacService {
     readonly hashOption: HashOptions = {},
     @Optional() private readonly logger?: OmnixysLogger,
   ) {
-    this.log = this.logger?.log(this.constructor.name);
+    this.log = this.logger?.log(this.constructor.name, 'package:@omnixys/security-ts');
     this.initKey('resetToken', hashOption.hmacResetToken, 'RESET_TOKEN_HMAC_SECRET');
     this.initKey(
       'deviceFingerprint',
