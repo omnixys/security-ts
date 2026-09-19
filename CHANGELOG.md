@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [5.1.1](https://github.com/omnixys/security-ts/compare/v5.1.0...v5.1.1) (2026-09-19)
+
+### Deps
+
+* **Deps:** update omnixys contracts-ts package ([](https://github.com/omnixys/security-ts/commit/2786a1e8382a6d4996ff3aee27310591bfef30c7))
+
 ## [5.1.0](https://github.com/omnixys/security-ts/compare/v5.0.0...v5.1.0) (2026-09-04)
 
 ### Log
